@@ -1,4 +1,5 @@
 from Qbit import Qbit
+import cz_layer_generation as cz
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import math
 import sys
@@ -6,9 +7,39 @@ import numpy as np
 
 
 class Qgrid:
+    """
+    Class to implement the quantum supremacy circuits as found
+    in https://www.nature.com/articles/s41567-018-0124-x
+    Each instance is a 2D array whose entries at Qbit objects.
+    A supremacy circuit can be generated for a given instance
+    by calling the gen_circuit() method.
 
-    def __init__(self, n, m, d, czfile=None, order=None,
-            singlegates=True, mirror=True):
+    Attributes
+    ----------
+    n : int
+        number of rows in the grid
+    m : int
+        number of columns in the grid
+    d : int
+        depth of the supremacy circuit (excludes H-layer and measurement i.e. 1+d+1)
+    qreg : QuantumRegister
+        Qiskit QuantumRegister holding all of the qubits
+    creg : ClassicalRegister
+        Qiskit ClassicalRegister holding all of the classical bits
+    circ : QuantumCircuit
+        Qiskit QuantumCircuit that represents the supremacy circuit
+    grid : array
+        n x m array holding Qbit objects
+    cz_list : list
+        List of the CZ-gate indices for each layer of the supremacy circuit
+    mirror : bool
+        Boolean indicating whether the cz layers should repeat exactly or in reverse order
+    order : list
+        list of indices indicting the order the cz layers should be placed
+    singlegates : bool
+        Boolean indicating whether to include single qubit gates in the circuit
+    """
+    def __init__(self, n, m, d, order=None, singlegates=True, mirror=True):
         self.n = n
         self.m = m
         self.d = d
@@ -16,9 +47,9 @@ class Qgrid:
         self.qreg = QuantumRegister(n*m, 'qreg')
         self.creg = ClassicalRegister(n*m, 'creg')
         self.circ = QuantumCircuit(self.qreg, self.creg)
-        
+
         self.grid = self.make_grid(n,m)
-        self.cz_list = self.get_CZs(n,m,fname=czfile)
+        self.cz_list = cz.get_layers(n,m)
         self.mirror = mirror
 
         if order is None:
@@ -39,6 +70,7 @@ class Qgrid:
 
         self.singlegates = singlegates
 
+
     def make_grid(self,n,m):
         temp_grid = []
         index_ctr = 0
@@ -51,25 +83,6 @@ class Qgrid:
 
         return temp_grid
 
-    def get_CZs(self,n,m,fname=None):
-        if fname is None:
-            fname = 'CZ_Layers/CZs_{}x{}.txt'.format(n,m)
-        arrangements = []
-        with open(fname,'r') as fn:
-            for line in fn:
-                if line[0] == 'A':
-                    anum = int(line[1:])
-                    cz_indices = []
-                elif line == '\n' or line == '':
-                    arrangements.append(cz_indices)
-                else:
-                    new_cz = line.split()
-                    ctrl_str = new_cz[0].split(',')
-                    ctrl = [int(g) for g in ctrl_str]
-                    trgt_str = new_cz[1].split(',')
-                    trgt = [int(g) for g in trgt_str]
-                    cz_indices.append((ctrl,trgt))
-        return arrangements
 
     def get_index(self, index1=None, index2=None):
         if index2 is None:
