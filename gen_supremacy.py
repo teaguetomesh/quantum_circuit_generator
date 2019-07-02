@@ -1,5 +1,5 @@
-from supremacy import Qgrid
-from supremacy import Qbit
+from .supremacy import Qgrid
+from .supremacy import Qbit
 
 
 def generate(height, width, depth, order=None, singlegates=True, mirror=True):
@@ -8,7 +8,7 @@ def generate(height, width, depth, order=None, singlegates=True, mirror=True):
     circuit as found in https://www.nature.com/articles/s41567-018-0124-x
     """
 
-    grid = Qgrid(height, width, depth, order=order, singlegates=singlegates, mirror=mirror)
+    grid = Qgrid.Qgrid(height, width, depth, order=order, singlegates=singlegates, mirror=mirror)
 
     circ = grid.gen_circuit()
 

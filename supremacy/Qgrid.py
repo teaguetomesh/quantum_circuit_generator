@@ -1,5 +1,5 @@
-from Qbit import Qbit
-import cz_layer_generation as cz
+from .Qbit import Qbit
+from .cz_layer_generation import get_layers
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import math
 import sys
@@ -46,10 +46,13 @@ class Qgrid:
 
         self.qreg = QuantumRegister(n*m, 'qreg')
         self.creg = ClassicalRegister(n*m, 'creg')
-        self.circ = QuantumCircuit(self.qreg, self.creg)
+        # It is easier to interface with the circuit cutter
+        # if there is no Classical Register added to the circuit
+        #self.circ = QuantumCircuit(self.qreg, self.creg)
+        self.circ = QuantumCircuit(self.qreg)
 
         self.grid = self.make_grid(n,m)
-        self.cz_list = cz.get_layers(n,m)
+        self.cz_list = get_layers(n,m)
         self.mirror = mirror
 
         if order is None:
@@ -177,7 +180,9 @@ class Qgrid:
                 self.circ.barrier()
 
         # Measurement
-        self.measure()
+        # It is easier to interface with the circuit cutter
+        # if the measurements are left off of the circuit...
+        #self.measure()
 
         return self.circ
 
