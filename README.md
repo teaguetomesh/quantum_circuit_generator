@@ -17,14 +17,16 @@ To generate circuits using the scripts in this package, first place the entire q
 ```
 your_project_folder/
     your.py
-    files.py
+    script.py
     here.py
     quantum_circuit_generator/
 ```
 
-As an example, you can generate a 4x4x8 supremacy circuit with the following lines
+You can then generate circuits in your scripts.
+As an example, inside script.py you can generate a 4x4x8 supremacy circuit with the following lines
 
 ```
+# within script.py
 from quantum_circuit_generator.gen_supremacy import generate
 
 circ = generate(4,4,8)
