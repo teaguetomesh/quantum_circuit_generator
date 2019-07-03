@@ -27,8 +27,8 @@ As an example, inside script.py you can generate a 4x4x8 supremacy circuit with 
 
 ```
 # within script.py
-from quantum_circuit_generator.gen_supremacy import generate
+from quantum_circuit_generator.generators import gen_supremacy
 
-circ = generate(4,4,8)
+circ = gen_supremacy(4,4,8)
 print(circ)
 ```
