@@ -1,7 +1,7 @@
 from .supremacy import Qgrid
 from .supremacy import Qbit
-from .ansatz import HWEA
-
+#from .ansatz import HWEA
+from .QAOA import hw_efficient_ansatz
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True, mirror=True):
     """
@@ -23,7 +23,7 @@ def gen_hwea(width, depth):
     depth (number of repetitions of the basic ansatz).
     """
 
-    hwea = HWEA.HWEA(width, depth)
+    hwea = hw_efficient_ansatz.HWEA(width, depth)
 
     circ = hwea.gen_circuit()
 
