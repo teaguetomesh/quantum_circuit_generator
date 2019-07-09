@@ -58,7 +58,7 @@ class HWEA:
         return(theta)
 
 
-    def gen_circuit(self):
+    def gen_circuit(self, barriers=True):
         """
         Create a circuit for the QAOA RyRz ansatz
 
@@ -74,7 +74,7 @@ class HWEA:
         QiskitError
             Prints the error in the circuit
         """
-        
+
         theta = self.get_noiseless_theta()
 
         try:
@@ -84,12 +84,13 @@ class HWEA:
             # layer 1
             for i in range(self.nq):
                 self.circ.u3(theta[i], 0, 0, self.qr[i])
-            
+
             # layer 2
             for i in range(self.nq):
                 self.circ.u3(0, 0, theta[i+self.nq], self.qr[i])
 
-            self.circ.barrier()
+            if barriers:
+                self.circ.barrier()
 
             # For each layer, d, execute an entangler followed by a parameterizer block
             for dd in range(self.d):
@@ -99,21 +100,22 @@ class HWEA:
                     self.circ.cx(self.qr[i], self.qr[i+1])
                     #qc.h(q[i+1])
 
-                self.circ.barrier()
+                if barriers:
+                    self.circ.barrier()
 
                 # PARAMETERIZER
                 # layer 1
                 for i in range(self.nq):
                     self.circ.u3(theta[i+2*self.nq], 0, 0, self.qr[i])
-            
+
                 # layer 2
                 for i in range(self.nq):
                     self.circ.u3(0, 0, theta[i+3*self.nq], self.qr[i])
-            
+
                 # self.circ.measure(q,c)
-            
+
             return(self.circ)
-        
+
         except QiskitError as ex:
             print('There was an error in the circuit!. Error = {}'.format(ex))
             sys.exit(2)
