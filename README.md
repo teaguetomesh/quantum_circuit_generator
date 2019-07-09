@@ -1,5 +1,5 @@
 # quantum-circuit-generator
-Python package for automated generation of quantum dynamics and supremacy circuits
+Python package for automated generation of various quantum circuits.
 
 ## Getting Started
 
@@ -32,3 +32,9 @@ from quantum_circuit_generator.generators import gen_supremacy
 circ = gen_supremacy(4,4,8)
 print(circ)
 ```
+
+## TODO
+
+ - [ ] implement quantum dynamics circuit generation
+ - [ ] include more types of ansatzes beyond HWEA
+ - [ ] add entanglement score function to utils
