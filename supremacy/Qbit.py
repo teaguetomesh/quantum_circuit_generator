@@ -12,12 +12,9 @@ class Qbit:
         return self.index
 
     def random_gate(self):
-        if self.prev_1q_gate is 'H':
-            self.prev_1q_gate = 'T'
-            return 'T'
-        else:
-            gate_choices = self.gate_dict[self.prev_1q_gate]
-            coin_flip = rand.randint(0,1)
-            self.prev_1q_gate = gate_choices[coin_flip]
-            return gate_choices[coin_flip]
+        # After a CZ-gate, randomly select X_1_2 or Y_1_2
+        gate_choices = ['X','Y']
+        coin_flip = rand.randint(0,1)
+        self.prev_1q_gate = gate_choices[coin_flip]
+        return gate_choices[coin_flip]
 

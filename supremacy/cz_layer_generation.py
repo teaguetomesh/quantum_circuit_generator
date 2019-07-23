@@ -56,9 +56,21 @@ def get_layers(n,m):
     return layers
 
 
+def get_row_major(n, m, loc):
+    return loc[0]*m + loc[1]
+
+
 def main():
 
-    print(get_layers(4,4))
+    n = 4
+    m = 4
+    layers = get_layers(n,m)
+
+    for i, l in enumerate(layers):
+        for cz in l:
+            print('{} cz {} {}'.format(i,get_row_major(n,m,cz[0]),
+                                       get_row_major(n,m,cz[1])))
+        print('')
 
 if __name__ == '__main__':
     main()
