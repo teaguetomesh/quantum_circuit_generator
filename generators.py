@@ -4,7 +4,7 @@ from .supremacy import Qbit
 from .QAOA import hw_efficient_ansatz
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
-                  mirror=True, barriers=True, measure=False):
+                  mirror=True, barriers=False, measure=False):
     """
     Calling this function will create and return a quantum supremacy
     circuit as found in https://www.nature.com/articles/s41567-018-0124-x
