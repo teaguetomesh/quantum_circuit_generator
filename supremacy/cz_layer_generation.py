@@ -62,8 +62,8 @@ def get_row_major(n, m, loc):
 
 def main():
 
-    n = 4
-    m = 4
+    n = 5
+    m = 6
     layers = get_layers(n,m)
 
     for i, l in enumerate(layers):
