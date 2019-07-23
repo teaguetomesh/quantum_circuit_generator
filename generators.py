@@ -3,15 +3,18 @@ from .supremacy import Qbit
 #from .ansatz import HWEA
 from .QAOA import hw_efficient_ansatz
 
-def gen_supremacy(height, width, depth, order=None, singlegates=True, mirror=True, barriers=True):
+def gen_supremacy(height, width, depth, order=None, singlegates=True,
+                  mirror=True, barriers=True, measure=False):
     """
     Calling this function will create and return a quantum supremacy
     circuit as found in https://www.nature.com/articles/s41567-018-0124-x
     """
 
-    grid = Qgrid.Qgrid(height, width, depth, order=order, singlegates=singlegates, mirror=mirror)
+    grid = Qgrid.Qgrid(height, width, depth, order=order,
+                       singlegates=singlegates, mirror=mirror,
+                       barriers=barriers, measure=measure)
 
-    circ = grid.gen_circuit(barriers=barriers)
+    circ = grid.gen_circuit()
 
     return circ
 

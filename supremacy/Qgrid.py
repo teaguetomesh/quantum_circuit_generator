@@ -39,7 +39,8 @@ class Qgrid:
     singlegates : bool
         Boolean indicating whether to include single qubit gates in the circuit
     """
-    def __init__(self, n, m, d, order=None, singlegates=True, mirror=True):
+    def __init__(self, n, m, d, order=None, singlegates=True, mirror=True,
+                 barriers=True, measure=False):
         self.n = n
         self.m = m
         self.d = d
@@ -48,12 +49,16 @@ class Qgrid:
         self.creg = ClassicalRegister(n*m, 'creg')
         # It is easier to interface with the circuit cutter
         # if there is no Classical Register added to the circuit
-        #self.circ = QuantumCircuit(self.qreg, self.creg)
-        self.circ = QuantumCircuit(self.qreg)
+        self.measure = measure
+        if self.measure:
+            self.circ = QuantumCircuit(self.qreg, self.creg)
+        else:
+            self.circ = QuantumCircuit(self.qreg)
 
         self.grid = self.make_grid(n,m)
         self.cz_list = get_layers(n,m)
         self.mirror = mirror
+        self.barriers = barriers
 
         if order is None:
             # Default
@@ -110,7 +115,7 @@ class Qgrid:
             for j in range(self.m):
                 self.circ.h(self.qreg[self.grid[i][j].h()])
 
-    def measure(self):
+    def measure_circuit(self):
         self.circ.barrier()
         for i in range(self.n):
             for j in range(self.m):
@@ -153,7 +158,7 @@ class Qgrid:
             return False
 
 
-    def gen_circuit(self, barriers=True):
+    def gen_circuit(self):
         print('Generating {}x{}, 1+{}+1 supremacy circuit'.format(self.n,self.m,self.d))
 
         # Initialize with Hadamards
@@ -216,7 +221,7 @@ class Qgrid:
                             prev_nondiag_gates.append(grid_loc)
 
 
-            if barriers:
+            if self.barriers:
                 self.circ.barrier()
         # End CZ-layers
 
@@ -224,9 +229,8 @@ class Qgrid:
         self.hadamard_layer()
 
         # Measurement
-        # It is easier to interface with the circuit cutter
-        # if the measurements are left off of the circuit...
-        #self.measure()
+        if self.measure:
+            self.measure_circuit()
 
         return self.circ
 
