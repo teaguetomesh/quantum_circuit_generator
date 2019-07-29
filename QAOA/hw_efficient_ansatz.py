@@ -18,19 +18,28 @@ class HWEA:
 
     """
 
-    def __init__(self, width, depth):
-        
-        # number of qubits 
+    def __init__(self, width, depth, parameters='optimal', barriers=False,
+                 measure=False):
+
+        # number of qubits
         self.nq = width
         # number of layers
         self.d  = depth
 
+        # set flags for circuit generation
+        self.parameters = parameters
+        self.barriers = barriers
+        self.measure = measure
+
 	# Create a Quantum and Classical Register.
         self.qr = QuantumRegister(self.nq)
+        self.cr = ClassicalRegister(self.nq)
         # It is easier for the circuit cutter to handle circuits
         # without measurement or classical registers
-        #c = ClassicalRegister(nb_qubits)
-        self.circ = QuantumCircuit(self.qr)
+        if self.measure:
+            self.circ = QuantumCircuit(self.qr, self.cr)
+        else:
+            self.circ = QuantumCircuit(self.qr)
 
 
     def get_noiseless_theta(self):
@@ -52,13 +61,20 @@ class HWEA:
         list
             vector of length 4*nb_qubits
         """
-    
+
         theta = [np.pi/2] + [0]*(2*self.nq-1) + [np.pi]*int(self.nq/2) + [0]*int(1.5*self.nq)
 
-        return(theta)
+        return theta
 
 
-    def gen_circuit(self, barriers=True):
+    def get_random_theta(self):
+
+        theta = np.random.uniform(-np.pi, np.pi, 4*self.nq)
+
+        return theta
+
+
+    def gen_circuit(self):
         """
         Create a circuit for the QAOA RyRz ansatz
 
@@ -75,7 +91,10 @@ class HWEA:
             Prints the error in the circuit
         """
 
-        theta = self.get_noiseless_theta()
+        if self.parameters == 'optimal':
+            theta = self.get_noiseless_theta()
+        elif self.parameters == 'random':
+            theta = self.get_random_theta()
 
         try:
             # print('Using initial_circuit of the RyRz QAOA')
@@ -89,7 +108,7 @@ class HWEA:
             for i in range(self.nq):
                 self.circ.u3(0, 0, theta[i+self.nq], self.qr[i])
 
-            if barriers:
+            if self.barriers:
                 self.circ.barrier()
 
             # For each layer, d, execute an entangler followed by a parameterizer block
@@ -100,7 +119,7 @@ class HWEA:
                     self.circ.cx(self.qr[i], self.qr[i+1])
                     #qc.h(q[i+1])
 
-                if barriers:
+                if self.barriers:
                     self.circ.barrier()
 
                 # PARAMETERIZER
@@ -112,9 +131,12 @@ class HWEA:
                 for i in range(self.nq):
                     self.circ.u3(0, 0, theta[i+3*self.nq], self.qr[i])
 
-                # self.circ.measure(q,c)
+            # place measurements on the end of the circuit
+            if self.measure:
+                self.circ.barrier()
+                self.circ.measure(self.qr,self.cr)
 
-            return(self.circ)
+            return self.circ
 
         except QiskitError as ex:
             print('There was an error in the circuit!. Error = {}'.format(ex))

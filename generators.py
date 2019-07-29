@@ -19,15 +19,17 @@ def gen_supremacy(height, width, depth, order=None, singlegates=True,
     return circ
 
 
-def gen_hwea(width, depth, barriers=True):
+def gen_hwea(width, depth, parameters='optimal', barriers=False,
+             measure=False):
     """
     Create a quantum circuit implementing a hardware efficient
     ansatz with the given width (number of qubits) and
     depth (number of repetitions of the basic ansatz).
     """
 
-    hwea = hw_efficient_ansatz.HWEA(width, depth)
+    hwea = hw_efficient_ansatz.HWEA(width, depth, parameters=parameters,
+                                    barriers=barriers, measure=measure)
 
-    circ = hwea.gen_circuit(barriers=barriers)
+    circ = hwea.gen_circuit()
 
     return circ
