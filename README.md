@@ -1,6 +1,10 @@
 # quantum-circuit-generator
 Python package for automated generation of various quantum circuits.
 
+Link to repo:
+
+https://github.com/teaguetomesh/quantum_circuit_generator
+
 ## Supported Circuits
  - Google quantum supremacy
  - Hardware-efficient ansatz for QAOA
