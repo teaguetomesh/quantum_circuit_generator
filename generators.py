@@ -2,6 +2,7 @@ from .supremacy import Qgrid
 from .supremacy import Qbit
 #from .ansatz import HWEA
 from .QAOA import hw_efficient_ansatz
+from .VQE import uccsd_ansatz
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
                   mirror=True, barriers=False, measure=False):
@@ -31,5 +32,18 @@ def gen_hwea(width, depth, parameters='optimal', barriers=False,
                                     barriers=barriers, measure=measure)
 
     circ = hwea.gen_circuit()
+
+    return circ
+
+
+def gen_uccsd(width, parameters='seeded', seed=1776, barriers=True):
+    """
+    Generate a UCCSD ansatz with the given width (number of qubits).
+    """
+
+    uccsd = uccsd_ansatz.UCCSD(width, parameters=parameters, seed=seed,
+                               barriers=barriers)
+
+    circ = uccsd.gen_circuit()
 
     return circ
