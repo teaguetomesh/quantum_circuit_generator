@@ -22,7 +22,9 @@ class HWEA:
         This is also the same as the "P" value often referenced for QAOA.
     parameters : str
         optional string which changes the rotation angles in the rotation block
-        [optimal, random]
+        [optimal, random, seeded]
+    seed : int
+        a number to seed the number generator with
     barriers : bool
         should barriers be included in the generated circuit
     measure : bool
@@ -38,8 +40,8 @@ class HWEA:
         Qiskit QuantumCircuit that represents the hardware-efficient ansatz
     """
 
-    def __init__(self, width, depth, parameters='optimal', barriers=False,
-                 measure=False, regname=None):
+    def __init__(self, width, depth, parameters='optimal', seed=None,
+                 barriers=False, measure=False, regname=None):
 
         # number of qubits
         self.nq = width
@@ -48,6 +50,7 @@ class HWEA:
 
         # set flags for circuit generation
         self.parameters = parameters
+        self.seed = seed
         self.barriers = barriers
         self.measure = measure
 
@@ -93,6 +96,13 @@ class HWEA:
 
     def get_random_theta(self):
 
+        if self.parameters == 'seeded':
+            if self.seed is None:
+                print('A valid seed must be provided')
+                sys.exit(2)
+            else:
+                np.random.seed(self.seed)
+
         theta = np.random.uniform(-np.pi, np.pi, 4*self.nq)
 
         return theta
@@ -117,8 +127,11 @@ class HWEA:
 
         if self.parameters == 'optimal':
             theta = self.get_noiseless_theta()
-        elif self.parameters == 'random':
+        elif   self.parameters in ['random', 'seeded']:
             theta = self.get_random_theta()
+        else:
+            print('Unknown parameter option: {}'.format(self.parameters))
+            sys.exit(2)
 
         try:
             # print('Using initial_circuit of the RyRz QAOA')
