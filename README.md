@@ -5,6 +5,7 @@ Python package for automated generation of various quantum circuits.
  - Google quantum supremacy
  - Hardware-efficient ansatz for QAOA
  - UCCSD ansatz for VQE
+ - QFT and inverse QFT
 
 More information on each of these circuits can be found within each of their respective files, including links to the relevant papers which describe their specification.
 
