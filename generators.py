@@ -3,6 +3,7 @@ from .supremacy import Qbit
 #from .ansatz import HWEA
 from .QAOA import hw_efficient_ansatz
 from .VQE import uccsd_ansatz
+from .QFT import qft_circ
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
                   mirror=True, barriers=False, measure=False):
@@ -47,3 +48,17 @@ def gen_uccsd(width, parameters='seeded', seed=1776, barriers=True):
     circ = uccsd.gen_circuit()
 
     return circ
+
+
+def gen_qft(width, inverse=False, kvals=False, barriers=True, measure=False):
+    """
+    Generate a QFT (or iQFT) circuit with the given number of qubits
+    """
+
+    qft = qft_circ.QFT(width, inverse=inverse, kvals=kvals, barriers=barriers,
+                       measure=measure)
+
+    circ = qft.gen_circuit()
+
+    return circ
+
