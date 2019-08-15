@@ -21,7 +21,7 @@ def gen_supremacy(height, width, depth, order=None, singlegates=True,
     return circ
 
 
-def gen_hwea(width, depth, parameters='optimal', barriers=False,
+def gen_hwea(width, depth, parameters='optimal', seed=None, barriers=False,
              measure=False, regname=None):
     """
     Create a quantum circuit implementing a hardware efficient
@@ -30,15 +30,15 @@ def gen_hwea(width, depth, parameters='optimal', barriers=False,
     """
 
     hwea = hw_efficient_ansatz.HWEA(width, depth, parameters=parameters,
-                                    barriers=barriers, measure=measure,
-                                    regname=regname)
+                                    seed=seed, barriers=barriers,
+                                    measure=measure, regname=regname)
 
     circ = hwea.gen_circuit()
 
     return circ
 
 
-def gen_uccsd(width, parameters='seeded', seed=1776, barriers=True,
+def gen_uccsd(width, parameters='seeded', seed=None, barriers=True,
               regname=None):
     """
     Generate a UCCSD ansatz with the given width (number of qubits).
