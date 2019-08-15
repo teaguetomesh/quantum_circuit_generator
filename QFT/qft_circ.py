@@ -72,9 +72,22 @@ class QFT:
 
         For each j qubit, a controlled cu1 gate is applied with target=j,
         control=k (for each k).
-        """
 
-        return None
+        cu1 = 1  0
+              0  e^(-2pi*i / 2^(k-j+1))
+        """
+        for j in range(self.nq-1,-1,-1):
+            for k in range(self.nq-1,j,-1):
+                if self.kvals:
+                    self.circ.cu1(-1*(k-j+1), self.qr[k], self.qr[j])
+                else:
+                    self.circ.cu1(-1 * (2*np.pi) / (2**(k-j+1)),
+                                  self.qr[k],
+                                  self.qr[j])
+            self.circ.h(self.qr[j])
+
+            if self.barriers:
+                self.circ.barrier()
 
 
     def reg_qft(self):
