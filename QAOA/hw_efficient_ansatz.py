@@ -15,11 +15,31 @@ class HWEA:
 
     Attributes
     ----------
-
+    nq : int
+        number of qubits
+    d : int
+        number of layers to apply. Where a layer = rotation block + entangler block
+        This is also the same as the "P" value often referenced for QAOA.
+    parameters : str
+        optional string which changes the rotation angles in the rotation block
+        [optimal, random]
+    barriers : bool
+        should barriers be included in the generated circuit
+    measure : bool
+        should a classical register & measurement be added to the circuit
+    regname : str
+        optional string to name the quantum and classical registers. This
+        allows for the easy concatenation of multiple QuantumCircuits.
+    qr : QuantumRegister
+        Qiskit QuantumRegister holding all of the quantum bits
+    cr : ClassicalRegister
+        Qiskit ClassicalRegister holding all of the classical bits
+    circ : QuantumCircuit
+        Qiskit QuantumCircuit that represents the hardware-efficient ansatz
     """
 
     def __init__(self, width, depth, parameters='optimal', barriers=False,
-                 measure=False):
+                 measure=False, regname=None):
 
         # number of qubits
         self.nq = width
@@ -32,8 +52,12 @@ class HWEA:
         self.measure = measure
 
 	# Create a Quantum and Classical Register.
-        self.qr = QuantumRegister(self.nq)
-        self.cr = ClassicalRegister(self.nq)
+        if regname is None:
+            self.qr = QuantumRegister(self.nq)
+            self.cr = ClassicalRegister(self.nq)
+        else:
+            self.qr = QuantumRegister(self.nq, name=regname)
+            self.cr = ClassicalRegister(self.nq, name='c'+regname)
         # It is easier for the circuit cutter to handle circuits
         # without measurement or classical registers
         if self.measure:

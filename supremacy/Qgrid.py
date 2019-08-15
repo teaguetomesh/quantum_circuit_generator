@@ -22,6 +22,9 @@ class Qgrid:
         number of columns in the grid
     d : int
         depth of the supremacy circuit (excludes H-layer and measurement i.e. 1+d+1)
+    regname : str
+        optional string to name the quantum and classical registers. This
+        allows for the easy concatenation of multiple QuantumCircuits.
     qreg : QuantumRegister
         Qiskit QuantumRegister holding all of the qubits
     creg : ClassicalRegister
@@ -40,13 +43,17 @@ class Qgrid:
         Boolean indicating whether to include single qubit gates in the circuit
     """
     def __init__(self, n, m, d, order=None, singlegates=True, mirror=True,
-                 barriers=True, measure=False):
+                 barriers=True, measure=False, regname=None):
         self.n = n
         self.m = m
         self.d = d
 
-        self.qreg = QuantumRegister(n*m, 'qreg')
-        self.creg = ClassicalRegister(n*m, 'creg')
+        if regname is None:
+            self.qreg = QuantumRegister(n*m)
+            self.creg = ClassicalRegister(n*m)
+        else:
+            self.qreg = QuantumRegister(n*m, name=regname)
+            self.creg = ClassicalRegister(n*m, name='c'+regname)
         # It is easier to interface with the circuit cutter
         # if there is no Classical Register added to the circuit
         self.measure = measure

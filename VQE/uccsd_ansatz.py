@@ -50,13 +50,17 @@ class UCCSD:
         a number to seed the number generator with
     barriers : bool
         should barriers be included in the generated circuit
+    regname : str
+        optional string to name the quantum and classical registers. This
+        allows for the easy concatenation of multiple QuantumCircuits.
     qr : QuantumRegister
         Qiskit QuantumRegister holding all of the quantum bits
     circ : QuantumCircuit
         Qiskit QuantumCircuit that represents the uccsd circuit
     """
 
-    def __init__(self, width, parameters='random', seed=None, barriers=False):
+    def __init__(self, width, parameters='random', seed=None, barriers=False,
+                 regname=None):
 
         # number of qubits
         self.nq = width
@@ -72,7 +76,10 @@ class UCCSD:
         # to measure all of the terms in the Hamiltonian for an instance
         # VQE, but it is also easier for the circuit cutter to handle
         # circuits without measurement/classical registers.
-        self.qr = QuantumRegister(self.nq)
+        if regname is None:
+            self.qr = QuantumRegister(self.nq)
+        else:
+            self.qr = QuantumRegister(self.nq, name=regname)
         self.circ = QuantumCircuit(self.qr)
 
 
@@ -248,7 +255,7 @@ class UCCSD:
         num_dbl = (self.nq**4 - 6*self.nq**3 + 11*self.nq**2 - 6*self.nq) / 24
         num_sgl = (self.nq**2 - self.nq) / 2
         numparam = int(num_dbl + num_sgl)
-        print('Predicted numparams = {}'.format(numparam))
+
         if self.parameters == 'random':
 
             param = np.random.uniform(-np.pi, np.pi, numparam)
@@ -284,7 +291,7 @@ class UCCSD:
             #print(p,q)
             self.SingleExcitationOperator(param[p_i], p, q)
             p_i += 1
-        print('Actual numparams = {}'.format(p_i))
+
         return self.circ
 
 

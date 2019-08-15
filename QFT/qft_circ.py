@@ -33,6 +33,9 @@ class QFT:
         should barriers be included in the generated circuit
     measure : bool
         should a classical register & measurement be added to the circuit
+    regname : str
+        optional string to name the quantum and classical registers. This
+        allows for the easy concatenation of multiple QuantumCircuits.
     qr : QuantumRegister
         Qiskit QuantumRegister holding all of the quantum bits
     cr : ClassicalRegister
@@ -42,7 +45,7 @@ class QFT:
     """
 
     def __init__(self, width, inverse=False, kvals=False, barriers=True,
-                 measure=False):
+                 measure=False, regname=None):
 
         # number of qubits
         self.nq = width
@@ -54,8 +57,12 @@ class QFT:
         self.measure = measure
 
         # create a QuantumCircuit object
-        self.qr = QuantumRegister(self.nq)
-        self.cr = ClassicalRegister(self.nq)
+        if regname is None:
+            self.qr = QuantumRegister(self.nq)
+            self.cr = ClassicalRegister(self.nq)
+        else:
+            self.qr = QuantumRegister(self.nq, name=regname)
+            self.cr = ClassicalRegister(self.nq, name='c'+regname)
         # Have the option to include measurement if desired
         if self.measure:
             self.circ = QuantumCircuit(self.qr,self.cr)

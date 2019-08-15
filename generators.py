@@ -6,7 +6,7 @@ from .VQE import uccsd_ansatz
 from .QFT import qft_circ
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
-                  mirror=True, barriers=False, measure=False):
+                  mirror=True, barriers=False, measure=False, regname=None):
     """
     Calling this function will create and return a quantum supremacy
     circuit as found in https://www.nature.com/articles/s41567-018-0124-x
@@ -14,7 +14,7 @@ def gen_supremacy(height, width, depth, order=None, singlegates=True,
 
     grid = Qgrid.Qgrid(height, width, depth, order=order,
                        singlegates=singlegates, mirror=mirror,
-                       barriers=barriers, measure=measure)
+                       barriers=barriers, measure=measure, regname=regname)
 
     circ = grid.gen_circuit()
 
@@ -22,7 +22,7 @@ def gen_supremacy(height, width, depth, order=None, singlegates=True,
 
 
 def gen_hwea(width, depth, parameters='optimal', barriers=False,
-             measure=False):
+             measure=False, regname=None):
     """
     Create a quantum circuit implementing a hardware efficient
     ansatz with the given width (number of qubits) and
@@ -30,33 +30,36 @@ def gen_hwea(width, depth, parameters='optimal', barriers=False,
     """
 
     hwea = hw_efficient_ansatz.HWEA(width, depth, parameters=parameters,
-                                    barriers=barriers, measure=measure)
+                                    barriers=barriers, measure=measure,
+                                    regname=regname)
 
     circ = hwea.gen_circuit()
 
     return circ
 
 
-def gen_uccsd(width, parameters='seeded', seed=1776, barriers=True):
+def gen_uccsd(width, parameters='seeded', seed=1776, barriers=True,
+              regname=None):
     """
     Generate a UCCSD ansatz with the given width (number of qubits).
     """
 
     uccsd = uccsd_ansatz.UCCSD(width, parameters=parameters, seed=seed,
-                               barriers=barriers)
+                               barriers=barriers, regname=regname)
 
     circ = uccsd.gen_circuit()
 
     return circ
 
 
-def gen_qft(width, inverse=False, kvals=False, barriers=True, measure=False):
+def gen_qft(width, inverse=False, kvals=False, barriers=True, measure=False,
+            regname=None):
     """
     Generate a QFT (or iQFT) circuit with the given number of qubits
     """
 
     qft = qft_circ.QFT(width, inverse=inverse, kvals=kvals, barriers=barriers,
-                       measure=measure)
+                       measure=measure, regname=regname)
 
     circ = qft.gen_circuit()
 
