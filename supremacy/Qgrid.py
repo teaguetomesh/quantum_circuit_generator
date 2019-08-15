@@ -77,8 +77,7 @@ class Qgrid:
             self.random = True
             self.order = np.arange(len(self.cz_list))
             if self.mirror is True:
-                print('Order cannot be random and mirror cannot be True simultaneously. Exiting.')
-                sys.exit(2)
+                raise Exception('Order cannot be random and mirror cannot be True simultaneously. Exiting.')
         else:
             # Convert given order string to list of ints
             self.random = False

@@ -98,8 +98,7 @@ class HWEA:
 
         if self.parameters == 'seeded':
             if self.seed is None:
-                print('A valid seed must be provided')
-                sys.exit(2)
+                raise Exception('A valid seed must be provided')
             else:
                 np.random.seed(self.seed)
 
@@ -130,8 +129,7 @@ class HWEA:
         elif   self.parameters in ['random', 'seeded']:
             theta = self.get_random_theta()
         else:
-            print('Unknown parameter option: {}'.format(self.parameters))
-            sys.exit(2)
+            raise Exception('Unknown parameter option: {}'.format(self.parameters))
 
         try:
             # print('Using initial_circuit of the RyRz QAOA')
@@ -176,8 +174,7 @@ class HWEA:
             return self.circ
 
         except QiskitError as ex:
-            print('There was an error in the circuit!. Error = {}'.format(ex))
-            sys.exit(2)
+            raise Exception('There was an error in the circuit!. Error = {}'.format(ex))
 
 
 if __name__ == "__main__":

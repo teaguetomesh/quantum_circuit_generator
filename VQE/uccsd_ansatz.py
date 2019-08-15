@@ -262,16 +262,14 @@ class UCCSD:
 
         elif self.parameters == 'seeded':
             if self.seed is None:
-                print('A valid seed must be provided')
-                sys.exit(2)
+                raise Exception('A valid seed must be provided')
             else:
                 np.random.seed(self.seed)
 
             param = np.random.uniform(-np.pi, np.pi, numparam)
 
         else:
-            print('Unknown parameter option')
-            sys.exit(2)
+            raise Exception('Unknown parameter option')
 
         p_i = 0
 
