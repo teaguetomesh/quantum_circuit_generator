@@ -45,5 +45,5 @@ print(circ)
 
  - [ ] implement quantum dynamics circuit generation
  - [x] include more UCCSD ansatz
- - [ ] include QFT circuit
+ - [x] include QFT circuit
  - [ ] add entanglement score function to utils
