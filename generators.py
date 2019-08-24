@@ -65,3 +65,16 @@ def gen_qft(width, inverse=False, kvals=False, barriers=True, measure=False,
 
     return circ
 
+
+def gen_qwalk(n, barriers=True, measure=False, regname=None):
+    """
+    Generate a quantum walk circuit with specified value of n
+    """
+
+    qwalk = quantum_walk.QWALK(n, barriers=barriers, measure=measure,
+                               regname=regname)
+
+    circ = qwalk.gen_circuit()
+
+    return circ
+

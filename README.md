@@ -10,6 +10,7 @@ https://github.com/teaguetomesh/quantum_circuit_generator
  - Hardware-efficient ansatz for QAOA
  - UCCSD ansatz for VQE
  - QFT and inverse QFT
+ - Quantum Walk (in development)
 
 More information on each of these circuits can be found within each of their respective files, including links to the relevant papers which describe their specification.
 
@@ -51,3 +52,4 @@ print(circ)
  - [x] include more UCCSD ansatz
  - [x] include QFT circuit
  - [ ] add entanglement score function to utils
+ - [ ] implement quantum walk circuits
