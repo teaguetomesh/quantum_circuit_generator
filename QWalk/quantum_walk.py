@@ -36,6 +36,11 @@ class QWALK:
         # set flags for circuit generation
         self.barriers = barriers
         self.k = self.gen_coloring()
+        # NOTE: self.nq does not include the r and 0 ancilla register qubits
+        #       that are also added to the circuit.
+        #       self.nq = len(a) + len(b)
+        #       Where a and b are both 2n bitstrings as defined in Childs et al.
+        self.nq = math.ceil(math.log2(self.N)) * 4
 
         # create a QuantumCircuit object
         if regname is None:
@@ -43,6 +48,13 @@ class QWALK:
         else:
             self.qr = QuantumRegister(self.nq, name=regname)
         self.circ = QuantumCircuit(self.qr)
+
+        # Add the r and 0 ancilla registers
+        self.ancR = QuantumRegister(1, 'ancR')
+        self.anc0 = QuantumRegister(1, 'anc0')
+        self.circ.add_register(self.ancR)
+        self.circ.add_register(self.anc0)
+
 
     def gen_coloring(self):
         """
@@ -79,7 +91,7 @@ class QWALK:
 
         t = 1
 
-        for c in range(k):
+        for c in range(self.k):
             self.Vc(c)
             self.evolve_T(t)
             self.Vc(c)
