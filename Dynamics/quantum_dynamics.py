@@ -32,7 +32,7 @@ class Dynamics:
 
     def __init__(self, H, barriers=False, measure=False, regname=None):
 
-        # number of vertices
+        # Hamiltonian
         self.H = H
 
         # set flags for circuit generation
@@ -59,7 +59,47 @@ class Dynamics:
         This number does not include the single ancilla qubit that is added
         to the circuit.
         """
-        return 3
+        numq = 0
+        for term in self.H:
+            if len(term) > numq:
+                numq = len(term)
+        return numq
+
+
+    def compute_to_Z_basis(self, pauli_str):
+        """
+        Take the given pauli_str of the form ABCD and apply operations to the
+        circuit which will take it from the ABCD basis to the ZZZZ basis
+
+        Parameters
+        ----------
+        pauli_str : str
+            string of the form 'p1p2p3...pN' where pK is a Pauli matrix
+        """
+        for i, pauli in enumerate(pauli_str):
+            if pauli is 'X':
+                self.circ.h(self.qr[i])
+            elif pauli is 'Y':
+                self.circ.h(self.qr[i])
+                self.circ.s(self.qr[i])
+
+
+    def uncompute_to_Z_basis(self, pauli_str):
+        """
+        Take the given pauli_str of the form ABCD and apply operations to the
+        circuit which will take it from the ZZZZ basis to the ABCD basis
+
+        Parameters
+        ----------
+        pauli_str : str
+            string of the form 'p1p2p3...pN' where pK is a Pauli matrix
+        """
+        for i, pauli in enumerate(pauli_str):
+            if pauli is 'X':
+                self.circ.h(self.qr[i])
+            elif pauli is 'Y':
+                self.circ.sdg(self.qr[i])
+                self.circ.h(self.qr[i])
 
 
     def apply_phase_shift(self, delta_t):
@@ -71,12 +111,12 @@ class Dynamics:
             self.circ.cx(self.qr[i], self.ancQ[0])
 
         # apply phase shift to the ancilla
-        self.circ.rz(delta_t, self.ancQ[0])
+        # rz applies the unitary: exp(-i*theta*Z/2)
+        self.circ.rz(2*delta_t, self.ancQ[0])
 
         # apply CNOT ladder -> uncompute parity
         for i in range(self.nq-1, -1, -1):
             self.circ.cx(self.qr[i], self.ancQ[0])
-
 
 
     def gen_circuit(self):
@@ -90,7 +130,12 @@ class Dynamics:
             no measurements
         """
 
-        self.apply_phase_shift(0.1)
+        for term in self.H:
+            self.compute_to_Z_basis(term)
+            self.apply_phase_shift(1)
+            self.uncompute_to_Z_basis(term)
+            if self.barriers:
+                self.circ.barrier()
 
         return self.circ
 
