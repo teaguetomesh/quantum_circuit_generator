@@ -129,13 +129,23 @@ class Dynamics:
             QuantumCircuit object of size nq with no ClassicalRegister and
             no measurements
         """
+        
+        # generate a naive version of a simulation circuit
 
         for term in self.H:
             self.compute_to_Z_basis(term)
+            if self.barriers:
+                self.circ.barrier()
             self.apply_phase_shift(1)
+            if self.barriers:
+                self.circ.barrier()
             self.uncompute_to_Z_basis(term)
             if self.barriers:
                 self.circ.barrier()
+
+        # generate a commutation aware version of a simulation circuit
+        # simulate all commuting terms simulataneously by using 1 ancilla per 
+        # term that will encode the phase shift based on the parity of the term.
 
         return self.circ
 
