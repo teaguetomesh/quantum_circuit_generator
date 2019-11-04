@@ -9,7 +9,12 @@ import numpy as np
 class Qgrid:
     """
     Class to implement the quantum supremacy circuits as found
-    in https://www.nature.com/articles/s41567-018-0124-x
+    in Arute, F., Arya, K., Babbush, R. et al. 'Quantum supremacy using a
+    programmable superconducting processor'. Nature 574, 505–510 (2019)
+    doi:10.1038/s41586-019-1666-5
+
+    (https://www.nature.com/articles/s41586-019-1666-5#citeas)
+
     Each instance is a 2D array whose entries at Qbit objects.
     A supremacy circuit can be generated for a given instance
     by calling the gen_circuit() method.
@@ -21,7 +26,7 @@ class Qgrid:
     m : int
         number of columns in the grid
     d : int
-        depth of the supremacy circuit (excludes H-layer and measurement i.e. 1+d+1)
+        depth of the supremacy circuit (excludes measurement i.e. d+1)
     regname : str
         optional string to name the quantum and classical registers. This
         allows for the easy concatenation of multiple QuantumCircuits.
@@ -33,16 +38,15 @@ class Qgrid:
         Qiskit QuantumCircuit that represents the supremacy circuit
     grid : array
         n x m array holding Qbit objects
-    cz_list : list
-        List of the CZ-gate indices for each layer of the supremacy circuit
-    mirror : bool
-        Boolean indicating whether the cz layers should repeat exactly or in reverse order
+    q2_list : list
+        List of qubit indices for 2-qubit gates for each layer of the supremacy
+        circuit
     order : list
         list of indices indicting the order the cz layers should be placed
     singlegates : bool
         Boolean indicating whether to include single qubit gates in the circuit
     """
-    def __init__(self, n, m, d, order=None, singlegates=True, mirror=True,
+    def __init__(self, n, m, d, order=None, singlegates=True,
                  barriers=True, measure=False, regname=None):
         self.n = n
         self.m = m
@@ -63,27 +67,16 @@ class Qgrid:
             self.circ = QuantumCircuit(self.qreg)
 
         self.grid = self.make_grid(n,m)
-        self.cz_list = get_layers(n,m)
-        self.mirror = mirror
+        self.q2_list = get_layers(n,m)
         self.barriers = barriers
+        self.singlegates = singlegates
 
         if order is None:
-            # Default
-            self.random = False
             # Use the default Google order (https://github.com/sboixo/GRCS)
             self.order = [0,5,1,4,2,7,3,6]
-        elif order == 'random':
-            # Random order
-            self.random = True
-            self.order = np.arange(len(self.cz_list))
-            if self.mirror is True:
-                raise Exception('Order cannot be random and mirror cannot be True simultaneously. Exiting.')
         else:
             # Convert given order string to list of ints
-            self.random = False
             self.order = [int(c) for c in order]
-
-        self.singlegates = singlegates
 
 
     def make_grid(self,n,m):
@@ -105,8 +98,10 @@ class Qgrid:
         else:
             return self.grid[index1][index2].index
 
+
     def print_circuit(self):
         print(self.circ.draw(scale=0.6, output='text', reverse_bits=False))
+
 
     def save_circuit(self):
         str_order = [str(i) for i in self.order]
@@ -116,10 +111,6 @@ class Qgrid:
         self.circ.draw(scale=0.8, filename=fn, output='text', reverse_bits=False, 
                 line_length=160)
 
-    def hadamard_layer(self):
-        for i in range(self.n):
-            for j in range(self.m):
-                self.circ.h(self.qreg[self.grid[i][j].h()])
 
     def measure_circuit(self):
         self.circ.barrier()
@@ -128,111 +119,49 @@ class Qgrid:
                 qubit_index = self.get_index(i,j)
                 self.circ.measure(self.qreg[qubit_index], self.creg[qubit_index])
 
-    def apply_postCZ_gate(self, grid_loc, reserved_qubits):
-        qb_index = self.get_index(grid_loc)
-        if qb_index not in reserved_qubits:
-            gate = self.grid[grid_loc[0]][grid_loc[1]].random_gate()
-            if gate is 'Y':
-                # Apply a sqrt-Y gate to qubit at qb_index
-                self.circ.ry(math.pi/2, self.qreg[qb_index])
-            elif gate is 'X':
-                # Apply a sqrt-X gate to qubit at qb_index
-                self.circ.rx(math.pi/2, self.qreg[qb_index])
-            else:
-                print('ERROR: unrecognized gate: {}'.format(gate))
-            # successfully applied random gate
-            return True
+
+    def apply_random_1q_gate(self, n, m):
+        qb_index = self.get_index(n, m)
+        gate = self.grid[n][m].random_gate()
+        if gate is 'X':
+            # Apply a sqrt-X gate to qubit at qb_index
+            self.circ.rx(math.pi/2, self.qreg[qb_index])
+        elif gate is 'Y':
+            # Apply a sqrt-Y gate to qubit at qb_index
+            self.circ.ry(math.pi/2, self.qreg[qb_index])
+        elif gate is 'W':
+            # Apply a sqrt-W gate to qubit at qb_index
+            # W = (X + Y) / sqrt(2)
+            self.circ.z(self.qreg[qb_index])
         else:
-            # did not apply gate
-            return False
-
-
-    def apply_T(self, grid_loc, reserved_qubits):
-        """
-        Apply a T gate on the specified qubit if it is not currently
-        involved in a CZ gate
-
-        grid_loc = [row_idx, col_idx]
-        """
-        qb_index = self.get_index(grid_loc[0],grid_loc[1])
-        if qb_index not in reserved_qubits:
-            self.circ.t(self.qreg[qb_index])
-            # successfully applied T gate
-            return True
-        else:
-            # Currently involved in a CZ gate
-            return False
+            Exception('ERROR: unrecognized gate: {}'.format(gate))
 
 
     def gen_circuit(self):
-        print('Generating {}x{}, 1+{}+1 supremacy circuit'.format(self.n,self.m,self.d))
+        print('Generating {}x{}, {}+1 supremacy circuit'.format(self.n,self.m,self.d))
 
-        # Initialize with Hadamards
-        self.hadamard_layer()
-
-        # Iterate through CZ layers
+        # Iterate through d layers
         cz_idx = -1
-        nlayer = len(self.cz_list)
+        nlayer = len(self.q2_list)
         for i in range(self.d):
-            prev_idx = cz_idx
+            # apply single qubit gates
+            for n in range(self.n):
+                for m in range(self.m):
+                    self.apply_random_1q_gate(n,m)
 
-            if self.mirror is True:
-                if (i // nlayer) % 2 == 0:
-                    cz_idx = self.order[i % nlayer]
-                else:
-                    cz_idx = self.order[::-1][i % nlayer]
-            elif self.random is True:
-                cur_mod = i % nlayer
-                if cur_mod == 0:
-                    random_order = np.random.permutation(self.order)
-                    cz_idx = random_order[cur_mod]
-                else:
-                    cz_idx = random_order[cur_mod]
-            else:
-                cz_idx = self.order[i % nlayer]
-
-            cur_CZs = self.cz_list[cz_idx]
-            pre_CZs = self.cz_list[prev_idx]
-            reserved_qubits = []
-
-            # Apply entangling CZ gates
-            for cz in cur_CZs:
-                ctrl = self.get_index(cz[0])
-                trgt = self.get_index(cz[1])
-                reserved_qubits += [ctrl,trgt]
+            # Apply entangling 2-qubit gates
+            q2_idx = self.order[i % nlayer]
+            cur_q2s = self.q2_list[q2_idx]
+            for q2 in cur_q2s:
+                ctrl = self.get_index(q2[0])
+                trgt = self.get_index(q2[1])
+                # The 2 qubit gate implemented by Google's Sycamore chip
+                # is fSim(pi/2, pi/6) given in Eqn. 53 of the Nature Supp info
                 self.circ.cz(self.qreg[ctrl],self.qreg[trgt])
-
-            if i == 0 and self.singlegates:
-                # Apply T gates on all first layer qubits not involved in a CZ
-                for n in range(self.n):
-                    for m in range(self.m):
-                        self.apply_T([n,m], reserved_qubits)
-
-            if i > 1 and self.singlegates:
-                # Apply T gates to all qubits which had a X_1_2 or
-                # Y_1_2 in the last cycle and are not involved in
-                # a CZ this cycle
-                for grid_loc in prev_nondiag_gates:
-                    self.apply_T(grid_loc, reserved_qubits)
-
-            if i > 0 and self.singlegates:
-                # Apply non-diagonal single qubit gates to qubits which
-                # were involved in a CZ gate in the previous cycle
-                prev_nondiag_gates = []
-                for cz in pre_CZs:
-                    for grid_loc in cz:
-                        success = self.apply_postCZ_gate(grid_loc,
-                                                         reserved_qubits)
-                        if success:
-                            prev_nondiag_gates.append(grid_loc)
-
 
             if self.barriers:
                 self.circ.barrier()
-        # End CZ-layers
-
-        # Apply a layer of Hadamards before measurement
-        self.hadamard_layer()
+        # End d layers
 
         # Measurement
         if self.measure:

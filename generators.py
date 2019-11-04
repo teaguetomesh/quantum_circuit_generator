@@ -7,15 +7,15 @@ from .QWalk import quantum_walk
 from .Dynamics import quantum_dynamics
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
-                  mirror=True, barriers=False, measure=False, regname=None):
+                  barriers=False, measure=False, regname=None):
     """
     Calling this function will create and return a quantum supremacy
-    circuit as found in https://www.nature.com/articles/s41567-018-0124-x
+    circuit as found in https://www.nature.com/articles/s41586-019-1666-5
     """
 
     grid = Qgrid.Qgrid(height, width, depth, order=order,
-                       singlegates=singlegates, mirror=mirror,
-                       barriers=barriers, measure=measure, regname=regname)
+                       singlegates=singlegates, barriers=barriers,
+                       measure=measure, regname=regname)
 
     circ = grid.gen_circuit()
 
