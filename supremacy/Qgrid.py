@@ -1,5 +1,5 @@
 from .Qbit import Qbit
-from .cz_layer_generation import get_layers
+from .ABCD_layer_generation import get_layers
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import math
 import sys
@@ -13,7 +13,7 @@ class Qgrid:
     programmable superconducting processor'. Nature 574, 505–510 (2019)
     doi:10.1038/s41586-019-1666-5
 
-    (https://www.nature.com/articles/s41586-019-1666-5#citeas)
+    (https://www.nature.com/articles/s41586-019-1666-5)
 
     Each instance is a 2D array whose entries at Qbit objects.
     A supremacy circuit can be generated for a given instance
@@ -38,9 +38,9 @@ class Qgrid:
         Qiskit QuantumCircuit that represents the supremacy circuit
     grid : array
         n x m array holding Qbit objects
-    q2_list : list
-        List of qubit indices for 2-qubit gates for each layer of the supremacy
-        circuit
+    ABCD_layers : list
+        List of qubit indices for 2-qubit gates for the A, B, C, and D layers of
+        the supremacy circuit.
     order : list
         list of indices indicting the order the cz layers should be placed
     singlegates : bool
@@ -67,13 +67,16 @@ class Qgrid:
             self.circ = QuantumCircuit(self.qreg)
 
         self.grid = self.make_grid(n,m)
-        self.q2_list = get_layers(n,m)
+        self.ABCD_layers = get_layers(n,m)
         self.barriers = barriers
         self.singlegates = singlegates
 
         if order is None:
-            # Use the default Google order (https://github.com/sboixo/GRCS)
-            self.order = [0,5,1,4,2,7,3,6]
+            # Use the default Google order for full supremacy circuit
+            # In the Nature paper Supp Info. Table 3 shows that the
+            # full supremacy circuit pattern is: ABCDCDAB
+            # ABCD_layers = [layerA, layerB, layerC, layerD]
+            self.order = [0,1,2,3,2,3,0,1]
         else:
             # Convert given order string to list of ints
             self.order = [int(c) for c in order]
@@ -141,8 +144,6 @@ class Qgrid:
         print('Generating {}x{}, {}+1 supremacy circuit'.format(self.n,self.m,self.d))
 
         # Iterate through d layers
-        cz_idx = -1
-        nlayer = len(self.q2_list)
         for i in range(self.d):
             # apply single qubit gates
             for n in range(self.n):
@@ -150,8 +151,7 @@ class Qgrid:
                     self.apply_random_1q_gate(n,m)
 
             # Apply entangling 2-qubit gates
-            q2_idx = self.order[i % nlayer]
-            cur_q2s = self.q2_list[q2_idx]
+            cur_q2s = self.ABCD_layers[self.order[i % len(self.order)]]
             for q2 in cur_q2s:
                 ctrl = self.get_index(q2[0])
                 trgt = self.get_index(q2[1])

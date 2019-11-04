@@ -45,7 +45,7 @@ def get_layers(n,m):
     With the given n, m denoting a (n x m) matrix,
     return the corresponding layers of CZ gates that
     will enact a two qubit interaction between
-    each pair neighbors.
+    each pair of neighbors.
     """
 
     layers = []
@@ -62,15 +62,15 @@ def get_row_major(n, m, loc):
 
 def main():
 
-    n = 5
+    n = 4
     m = 6
     layers = get_layers(n,m)
-
-    for i, l in enumerate(layers):
-        for cz in l:
-            print('{} cz {} {}'.format(i,get_row_major(n,m,cz[0]),
-                                       get_row_major(n,m,cz[1])))
-        print('')
+    print(layers)
+    #for i, l in enumerate(layers):
+    #    for cz in l:
+    #        print('{} cz {} {}'.format(i,get_row_major(n,m,cz[0]),
+    #                                   get_row_major(n,m,cz[1])))
+    #    print('')
 
 if __name__ == '__main__':
     main()
