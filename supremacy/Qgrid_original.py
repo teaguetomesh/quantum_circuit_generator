@@ -1,4 +1,4 @@
-from .Qbit import Qbit
+from .Qbit_original import Qbit
 from .cz_layer_generation import get_layers
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import math

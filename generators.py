@@ -1,5 +1,4 @@
-from .supremacy import Qgrid
-from .supremacy import Qbit
+from .Supremacy import Qgrid_original, Qgrid_Sycamore
 from .QAOA import hw_efficient_ansatz
 from .VQE import uccsd_ansatz
 from .QFT import qft_circ
@@ -7,15 +6,34 @@ from .QWalk import quantum_walk
 from .Dynamics import quantum_dynamics
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
+                  mirror=False, barriers=False, measure=False, regname=None):
+    """
+    Calling this function will create and return a quantum supremacy
+    circuit based on the implementations in
+    https://www.nature.com/articles/s41567-018-0124-x and
+    https://github.com/sboixo/GRCS.
+    """
+
+    grid = Qgrid_original.Qgrid(height, width, depth, order=order,
+                                mirror=mirror, singlegates=singlegates,
+                                barriers=barriers, measure=measure,
+                                regname=regname)
+
+    circ = grid.gen_circuit()
+
+    return circ
+
+
+def gen_sycamore(height, width, depth, order=None, singlegates=True,
                   barriers=False, measure=False, regname=None):
     """
     Calling this function will create and return a quantum supremacy
     circuit as found in https://www.nature.com/articles/s41586-019-1666-5
     """
 
-    grid = Qgrid.Qgrid(height, width, depth, order=order,
-                       singlegates=singlegates, barriers=barriers,
-                       measure=measure, regname=regname)
+    grid = Qgrid_Sycamore.Qgrid(height, width, depth, order=order,
+                                singlegates=singlegates, barriers=barriers,
+                                measure=measure, regname=regname)
 
     circ = grid.gen_circuit()
 
