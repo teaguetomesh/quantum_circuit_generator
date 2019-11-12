@@ -4,6 +4,7 @@ from .VQE import uccsd_ansatz
 from .QFT import qft_circ
 from .QWalk import quantum_walk
 from .Dynamics import quantum_dynamics
+from .BernsteinVazirani import bernstein_vazirani
 
 def gen_supremacy(height, width, depth, order=None, singlegates=True,
                   mirror=False, barriers=False, measure=False, regname=None):
@@ -110,6 +111,23 @@ def gen_dynamics(H, barriers=True, measure=False, regname=None):
     return circ
 
 
+def gen_BV(secret=None, barriers=True,  measure=False, regname=None):
+    """
+    Generate an instance of the Bernstein-Vazirani algorithm which queries a
+    black-box oracle once to discover the secret key in:
+
+    f(x) = x . secret (mod 2)
+
+    The user must specify the secret bitstring to use: e.g. 00111001
+    (It can be given as a string or integer)
+    """
+
+    bv = bernstein_vazirani.BV(secret=secret, barriers=barriers,
+                               measure=measure, regname=regname)
+
+    circ = bv.gen_circuit()
+
+    return circ
 
 
 
