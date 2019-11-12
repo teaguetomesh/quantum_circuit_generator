@@ -40,11 +40,11 @@ class BV:
         self.measure = measure
         self.barriers = barriers
 
-        # create a QuantumCircuit object
+        # create a QuantumCircuit object with 1 extra qubit
         if regname is None:
-            self.qr = QuantumRegister(self.nq)
+            self.qr = QuantumRegister(self.nq+1)
         else:
-            self.qr = QuantumRegister(self.nq, name=regname)
+            self.qr = QuantumRegister(self.nq+1, name=regname)
         self.circ = QuantumCircuit(self.qr)
 
         # add ClassicalRegister if measure is True
@@ -53,8 +53,8 @@ class BV:
             self.circ.add_register(self.cr)
 
         # add the extra ancilla qubit
-        self.anc = QuantumRegister(1, 'ancilla')
-        self.circ.add_register(self.anc)
+        #self.anc = QuantumRegister(1, 'anc')
+        #self.circ.add_register(self.anc)
 
 
     def gen_circuit(self):
@@ -68,11 +68,11 @@ class BV:
         """
 
         # initialize ancilla in 1 state
-        self.circ.x(self.anc[0])
+        self.circ.x(self.qr[-1])
 
         # create initial superposition
         self.circ.h(self.qr)
-        self.circ.h(self.anc)
+        #self.circ.h(self.anc)
 
         # implement the black box oracle
         # for every bit that is 1 in the secret, place a CNOT gate
@@ -80,7 +80,7 @@ class BV:
         # (secret is little endian - index 0 is at the top of the circuit)
         for i, bit in enumerate(self.secret[::-1]):
             if bit is '1':
-                self.circ.cx(self.qr[i], self.anc[0])
+                self.circ.cx(self.qr[i], self.qr[-1])
 
         # add barriers
         if self.barriers:
@@ -88,11 +88,11 @@ class BV:
 
         # collapse superposition
         self.circ.h(self.qr)
-        self.circ.h(self.anc)
+        #self.circ.h(self.anc)
 
         # measure qubit register
         if self.measure:
-            self.circ.measure(self.qr, self.cr)
+            self.circ.measure(self.qr[:-1], self.cr)
 
         return self.circ
 
