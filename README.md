@@ -7,9 +7,10 @@ https://github.com/teaguetomesh/quantum_circuit_generator
 
 ## Supported Circuits
  - Google quantum supremacy
- - Hardware-efficient ansatz for QAOA
- - UCCSD ansatz for VQE
+ - QAOA ansatzes
+ - VQE ansatzes
  - QFT and inverse QFT
+ - Quantum Adder
  - Quantum Walk (in development)
 
 More information on each of these circuits can be found within each of their respective files, including links to the relevant papers which describe their specification.
@@ -45,11 +46,3 @@ from quantum_circuit_generator.generators import gen_supremacy
 circ = gen_supremacy(4,4,8)
 print(circ)
 ```
-
-## TODO
-
- - [ ] implement quantum dynamics circuit generation
- - [x] include more UCCSD ansatz
- - [x] include QFT circuit
- - [ ] add entanglement score function to utils
- - [ ] implement quantum walk circuits
