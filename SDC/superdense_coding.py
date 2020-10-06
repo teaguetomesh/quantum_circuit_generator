@@ -57,7 +57,7 @@ class SDC:
             Index of the qubit that the message will be encoded on
         """
         if msg == "00":
-            pass        # To send 00, we apply Identity gate (do nothing)
+            pass               # To send 00, we apply Identity gate (do nothing)
         elif msg == "10":
             self.circ.x(qubit) # To send 10, we apply X-gate
         elif msg == "01":
@@ -94,8 +94,8 @@ class SDC:
         # Create bell pairs for all n/2 pairs
         for i in range(0, self.nq, 2):
             self._create_bell_pair(i, i+1)
-        if (self.barriers): 
-            self.circ.barrier()
+            if (self.barriers): 
+                self.circ.barrier([i, i+1])
 
         # At this point, all even number qubits are sent to messenger and odd to receiver
 
@@ -103,8 +103,8 @@ class SDC:
         for i in range(0, self.nq, 2):
             curr_msg = self.msg[self.nq-i-2] + self.msg[self.nq-i-1]
             self._encode(i, curr_msg)
-        if (self.barriers): 
-            self.circ.barrier()
+            if (self.barriers): 
+                self.circ.barrier([i, i+1])
 
         # Messenger then sends their encoded qubit(s) to receiver
 
