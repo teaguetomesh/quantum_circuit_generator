@@ -2,7 +2,7 @@ from qiskit import QuantumCircuit
 
 class SDC:
     """
-    Generate an instance of the Superdense Coding Algorithm.
+    Generate an instance of the Superdense Coding Protocol.
 
     Attributes
     ----------
@@ -84,7 +84,7 @@ class SDC:
 
     def gen_circuit(self):
         """
-        Create a circuit implementing the Superdense Coding algorithm
+        Create a circuit implementing the Superdense Coding protocol
 
         Returns
         -------
