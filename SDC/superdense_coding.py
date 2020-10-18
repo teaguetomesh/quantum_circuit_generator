@@ -31,7 +31,7 @@ class SDC:
         self.barriers = barriers
 
         # Create a QuantumCircuit object with correct number of qubits
-        self.circ = QuantumCircuit(self.nq)
+        self.circ = QuantumCircuit(self.nq, self.nq)
 
     def _create_bell_pair(self, a, b):
         """
@@ -68,7 +68,7 @@ class SDC:
         else:
             print("Invalid Message: Sending '00'")
     
-    def _decode(self, a, b):
+    def _bell_state_measurement(self, a, b):
         """
         Decodes message by performing bell state measurement
 
@@ -110,9 +110,12 @@ class SDC:
 
         # Receiver decodes the qubit(s) sent from the messenger
         for i in range(0, self.nq, 2):
-            self._decode(i, i+1)
+            self._bell_state_measurement(i, i+1)
         
         # Receiver measures their qubits to read the messenger's message
-        self.circ.measure_all()
+        for i in range(0, self.nq, 2):
+            self.circ.barrier([i, i+1])
+            self.circ.measure(i, i)
+            self.circ.measure(i+1, i+1)
 
         return self.circ
