@@ -2,7 +2,7 @@ from qiskit import QuantumCircuit
 
 class SDC:
     """
-    Generate an instance of the Superdense Coding Algorithm.
+    Generate an instance of the Superdense Coding Protocol.
 
     Attributes
     ----------
@@ -31,7 +31,7 @@ class SDC:
         self.barriers = barriers
 
         # Create a QuantumCircuit object with correct number of qubits
-        self.circ = QuantumCircuit(self.nq)
+        self.circ = QuantumCircuit(self.nq, self.nq)
 
     def _create_bell_pair(self, a, b):
         """
@@ -57,7 +57,7 @@ class SDC:
             Index of the qubit that the message will be encoded on
         """
         if msg == "00":
-            pass        # To send 00, we apply Identity gate (do nothing)
+            pass               # To send 00, we apply Identity gate (do nothing)
         elif msg == "10":
             self.circ.x(qubit) # To send 10, we apply X-gate
         elif msg == "01":
@@ -68,7 +68,7 @@ class SDC:
         else:
             print("Invalid Message: Sending '00'")
     
-    def _decode(self, a, b):
+    def _bell_state_measurement(self, a, b):
         """
         Decodes message by performing bell state measurement
 
@@ -84,7 +84,7 @@ class SDC:
 
     def gen_circuit(self):
         """
-        Create a circuit implementing the Superdense Coding algorithm
+        Create a circuit implementing the Superdense Coding protocol
 
         Returns
         -------
@@ -94,8 +94,8 @@ class SDC:
         # Create bell pairs for all n/2 pairs
         for i in range(0, self.nq, 2):
             self._create_bell_pair(i, i+1)
-        if (self.barriers): 
-            self.circ.barrier()
+            if (self.barriers): 
+                self.circ.barrier([i, i+1])
 
         # At this point, all even number qubits are sent to messenger and odd to receiver
 
@@ -103,16 +103,19 @@ class SDC:
         for i in range(0, self.nq, 2):
             curr_msg = self.msg[self.nq-i-2] + self.msg[self.nq-i-1]
             self._encode(i, curr_msg)
-        if (self.barriers): 
-            self.circ.barrier()
+            if (self.barriers): 
+                self.circ.barrier([i, i+1])
 
         # Messenger then sends their encoded qubit(s) to receiver
 
         # Receiver decodes the qubit(s) sent from the messenger
         for i in range(0, self.nq, 2):
-            self._decode(i, i+1)
+            self._bell_state_measurement(i, i+1)
         
         # Receiver measures their qubits to read the messenger's message
-        self.circ.measure_all()
+        for i in range(0, self.nq, 2):
+            self.circ.barrier([i, i+1])
+            self.circ.measure(i, i)
+            self.circ.measure(i+1, i+1)
 
         return self.circ
