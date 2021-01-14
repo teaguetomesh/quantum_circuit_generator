@@ -11,6 +11,8 @@ https://github.com/teaguetomesh/quantum_circuit_generator
  - VQE ansatzes
  - QFT and inverse QFT
  - Quantum Adder
+ - Quantum teleportation
+ - Superdense coding
  - Quantum Walk (in development)
 
 More information on each of these circuits can be found within each of their respective files, including links to the relevant papers which describe their specification.
