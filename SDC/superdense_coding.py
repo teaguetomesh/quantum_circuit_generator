@@ -1,4 +1,5 @@
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit.visualization import plot_histogram
 
 class SDC:
     """
@@ -14,7 +15,7 @@ class SDC:
         Qiskit QuantumCircuit that represents the circuit
     """
 
-    def __init__(self, msg=None, barriers=True):
+    def __init__(self, msg=None, barriers=True, measure=True):
         if msg is None:
             raise Exception('Provide a message for the Superdense Coding circuit, example: 10')
         else:
@@ -29,6 +30,7 @@ class SDC:
             self.msg = "0" + msg
             self.nq += 1
         self.barriers = barriers
+        self.measure = measure
 
         # Create a QuantumCircuit object with correct number of qubits
         self.circ = QuantumCircuit(self.nq, self.nq)
@@ -115,7 +117,9 @@ class SDC:
         # Receiver measures their qubits to read the messenger's message
         for i in range(0, self.nq, 2):
             self.circ.barrier([i, i+1])
-            self.circ.measure(i, i)
-            self.circ.measure(i+1, i+1)
+            
+            if (self.measure):
+                self.circ.measure(i, i)
+                self.circ.measure(i+1, i+1)
 
         return self.circ
